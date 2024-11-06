@@ -1,4 +1,4 @@
-class Counter extends Thread{
+class Counter implements Runnable{
 
     private int number;
 
@@ -8,8 +8,13 @@ class Counter extends Thread{
 
     @Override
     public void run(){
-        for(int i = 1; i<=5; i++){
-            System.out.println("I'm Thread " + number + " and in my iteration number " + i);
+        for(int i=1; i<=5; i++) {
+            System.out.println("I'm Thread " + number + "in Iteration number " + i);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

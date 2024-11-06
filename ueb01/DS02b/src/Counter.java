@@ -1,6 +1,7 @@
 public class Counter {
 
     private int c = 0;
+
     public synchronized void increment () {
         int b = c ;
         b = b +1;

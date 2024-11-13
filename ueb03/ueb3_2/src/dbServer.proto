@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.dbserver";
+
+service DatabaseService {
+    rpc PerformOperation(RPC_Request) returns (RPC_Response);
+}
+
+message RPC_Request {
+//Enum für jede Operation
+enum Operation {
+    DEFAULT = 0; //Standardwert laut proto3 Style-Standards
+    GET_RECORD = 1;
+    ADD_RECORD = 2;
+    GET_SIZE = 3;
+}
+    Operation operation = 1;
+    optional int32 Index = 2;
+    optional string Record = 3;
+}
+
+message RPC_Response {
+    string record = 1;           // Holds the record data for getRecord
+    int32 size = 2;              // Holds the size data for getSize
+    bool success = 3;            // Indicates success for addRecord operation
+}

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "com.gmpc.logserver";
+option java_outer_classname = "LogMessageProtos";
+
+message LogMessage {
+  int64 timestamp = 1;
+  string creator = 2;
+  enum SeverityLevel {
+    DEBUG = 0;
+    INFO = 1;
+    WARN = 2;
+    ERROR = 3;
+    FATAL = 4;
+  }
+  SeverityLevel severity = 3;
+  string message = 4;
+}

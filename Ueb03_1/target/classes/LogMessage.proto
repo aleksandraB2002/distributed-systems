@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_package = "com.ghcp.logserver";
+option java_outer_classname = "LogMessageProtos";
+
+message LogMessage {
+  string timestamp = 1; // Zeitstempel
+  string creator = 2; // Ersteller des Log-Eintrags (optional)
+  string location = 3; // Ort des Log-Eintrags (optional)
+  enum Severity {
+    DEBUG = 0;
+    INFO = 1;
+    WARN = 2;
+    ERROR = 3;
+    FATAL = 4;
+  }
+  Severity severity = 4; // Schweregrad der Nachricht
+  string message = 5; // Text der Nachricht
+}

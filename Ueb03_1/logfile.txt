@@ -1,0 +1,6 @@
+Zeitstempel: 2024-11-13T10:52:00Z
+Ersteller: Client1
+Standort: Client-Side
+Schweregrad: INFO
+Nachricht: Dies ist eine Log-Nachricht.
+-----

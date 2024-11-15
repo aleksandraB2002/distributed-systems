@@ -106,7 +106,7 @@ public class Client {
         out.flush();
 
         RPC_Response response = rpcResponse();
-        System.out.println("Database is of size: " + r);
+        System.out.println("Database is of size: " + response);
     }
 
     private RPC_Response rpcResponse() throws IOException {

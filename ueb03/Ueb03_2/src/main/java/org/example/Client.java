@@ -1,59 +1,130 @@
 package org.example;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
+
+import io.grpc.dbserver.RPC_Request;
+import io.grpc.dbserver.RPC_RequestOrBuilder;
+import io.grpc.dbserver.RPC_Response;
+import io.grpc.dbserver.DbServer;
 
 public class Client {
+    private Socket socket;
+    private OutputStream out;
+    private InputStream in;
 
-    public static void main(String[] args) throws IOException {
-        Client c =  new Client();
+    public static void main(String[] args) {
+        try {
+            Client client = new Client("localhost",8080);
+            client.start();
+        } catch (IOException e) {
+            System.err.println("Could not start client: " + e.getMessage());
+        }
     }
 
-    public void httpGet(String msg, String host, int port) throws IOException {
-        StringBuilder ret = new StringBuilder();
-        Socket s = new Socket(host, port);
+    public Client(String host, int port) throws IOException {
+        socket = new Socket(host, port);
+        out = socket.getOutputStream();
+        in = socket.getInputStream();
+        System.out.println("Connected to " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
+    }
 
-        PrintWriter out = new PrintWriter(s.getOutputStream());
-        out.print(msg);
-        out.print("Host: " + host + "\r\n");
-        out.print("\r\n");
+    public void start() throws IOException {
+        Scanner scanner = new Scanner(System.in);
+
+        while(true){
+            System.out.println("1 = GET_RECORD, 2 = ADD_RECORD, 3 = GET_SIZE, 9 = END PROCESS");
+
+            int selection = scanner.nextInt();
+            //scanner.nextLine();
+            try {
+                switch (selection) {
+                    case 1:
+                        getRecord(scanner);
+                        break;
+                    case 2:
+                        addRecord(scanner);
+                        break;
+                    case 3:
+                        getSize(scanner);
+                        scanner.nextLine();
+                        break;
+                    case 9:
+                        break;
+                    default:
+                        System.out.println("Invalid selection");
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void getRecord(Scanner scanner) throws IOException {
+        System.out.println("Enter record number: ");
+        int number = scanner.nextInt();
+
+
+        RPC_Request r = RPC_Request.newBuilder()
+                .setOperation(RPC_Request.Operation.GET_RECORD)
+                .setIndex(number)
+                .build();
+
+        r.writeTo(out);
+        out.flush();
+        RPC_Response response = rpcResponse();
+
+        System.out.println(response + " was found at index " + number);
+    }
+
+    private void addRecord(Scanner scanner) throws IOException {
+        System.out.println("Enter record number: ");
+        int number = scanner.nextInt();
+        System.out.println("Enter a String: ");
+        String string = scanner.nextLine();
+
+        RPC_Request r = RPC_Request.newBuilder()
+                .setOperation(RPC_Request.Operation.ADD_RECORD)
+                .setIndex(number)
+                .setRecord(string)
+                .build();
+
+        r.writeTo(out);
         out.flush();
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        String line;
-        while((line = in.readLine()) != null) {
-            System.out.println(line);
-        }
-        in.close();
-        out.close();
-        s.close();
-        System.out.println(ret.toString());
-
+        RPC_Response response = rpcResponse();
+        System.out.println("Record " + response + " was added");
     }
 
-    public void httpPost(String msg, String host, int port, String data) throws IOException {
-        Socket s = new Socket(host, port);
+    private void getSize(Scanner scanner) throws IOException {
+        RPC_Request r = RPC_Request.newBuilder()
+                .setOperation(RPC_Request.Operation.GET_SIZE)
+                .build();
 
-        PrintWriter out = new PrintWriter(s.getOutputStream());
-        out.print("POST / HTTP/1.1\r\n");
-        out.print("Host: " + host + "\r\n");
-        out.print("Content-Length: " + data.length() + "\r\n");
-        out.print("Content-Type: text/plain\r\n");
-        out.print("\r\n");
-        out.print(data);
+        r.writeTo(out);
         out.flush();
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        String line;
-        while ((line = in.readLine()) != null) {
-            System.out.println(line);
-        }
-        in.close();
-        out.close();
-        s.close();
+        RPC_Response response = rpcResponse();
+        System.out.println("Database is of size: " + r);
     }
+
+    private RPC_Response rpcResponse() throws IOException {
+        byte[] buf = new byte[1024];
+        int bytesRead = in.read(buf);
+
+        if (bytesRead == -1) {
+            throw new RuntimeException("Server disconnected.");
+        }
+
+        // Wrap the bytes actually read in a ByteArrayInputStream
+        ByteArrayInputStream byteStream = new ByteArrayInputStream(buf, 0, bytesRead);
+
+        // Parse the RPC_Response from the ByteArrayInputStream
+        RPC_Response r = RPC_Response.parseFrom(byteStream);
+        byteStream = null;
+        return r;
+    }
+
 
 }

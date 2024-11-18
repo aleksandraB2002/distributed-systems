@@ -51,6 +51,7 @@ public class Client {
                         scanner.nextLine();
                         break;
                     case 9:
+                        socket.close();
                         break;
                     default:
                         System.out.println("Invalid selection");
@@ -71,7 +72,7 @@ public class Client {
                 .setIndex(number)
                 .build();
 
-        r.writeTo(out);
+        r.writeDelimitedTo(out);
         out.flush();
         RPC_Response response = rpcResponse();
 
@@ -81,6 +82,7 @@ public class Client {
     private void addRecord(Scanner scanner) throws IOException {
         System.out.println("Enter record number: ");
         int number = scanner.nextInt();
+        scanner.nextLine();
         System.out.println("Enter a String: ");
         String string = scanner.nextLine();
 
@@ -90,11 +92,11 @@ public class Client {
                 .setRecord(string)
                 .build();
 
-        r.writeTo(out);
+        r.writeDelimitedTo(out);
         out.flush();
 
         RPC_Response response = rpcResponse();
-        System.out.println("Record " + response + " was added");
+        System.out.println(response);
     }
 
     private void getSize(Scanner scanner) throws IOException {
@@ -102,7 +104,7 @@ public class Client {
                 .setOperation(RPC_Request.Operation.GET_SIZE)
                 .build();
 
-        r.writeTo(out);
+        r.writeDelimitedTo(out);
         out.flush();
 
         RPC_Response response = rpcResponse();
@@ -110,20 +112,7 @@ public class Client {
     }
 
     private RPC_Response rpcResponse() throws IOException {
-        byte[] buf = new byte[1024];
-        int bytesRead = in.read(buf);
-
-        if (bytesRead == -1) {
-            throw new RuntimeException("Server disconnected.");
-        }
-
-        // Wrap the bytes actually read in a ByteArrayInputStream
-        ByteArrayInputStream byteStream = new ByteArrayInputStream(buf, 0, bytesRead);
-
-        // Parse the RPC_Response from the ByteArrayInputStream
-        RPC_Response r = RPC_Response.parseFrom(byteStream);
-        byteStream = null;
-        return r;
+        return RPC_Response.parseDelimitedFrom(in);
     }
 
 

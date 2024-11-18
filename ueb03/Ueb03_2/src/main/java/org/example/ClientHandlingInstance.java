@@ -19,28 +19,23 @@ public class ClientHandlingInstance implements Runnable {
     @Override
     public void run() {
         try {
-            InputStream in = socket.getInputStream();
-            OutputStream out = socket.getOutputStream();
+            while(!Thread.currentThread().isInterrupted()) {
+                InputStream in = socket.getInputStream();
+                OutputStream out = socket.getOutputStream();
 
-            byte[] buf = new byte[1024];
-            int bytesRead = 0;
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-
-            while ((bytesRead = in.read(buf)) != -1) {
-                byteStream.write(buf, 0, bytesRead);
-                if (in.available() <= 0) break; // End if no more data is available
+                // Parse the RPC_Request from the message bytes
+                RPC_Request request = RPC_Request.parseDelimitedFrom(in);
+                System.out.println(request);
+                RPC_Response response = handleRequest(request);
+                response.writeDelimitedTo(out);
+                out.flush();
             }
-
-            // Convert byte array output stream to byte array
-            byte[] messageBytes = byteStream.toByteArray();
-
-            // Parse the RPC_Request from the message bytes
-            RPC_Request request = RPC_Request.parseFrom(messageBytes);
-            RPC_Response response = handleRequest(request);
-            response.writeTo(out);
-            out.flush();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            if (e instanceof java.net.SocketException) {
+                System.out.println("Client connection closed: " + e.getMessage());
+            } else {
+                System.out.println(e);
+            }
         }
     }
 

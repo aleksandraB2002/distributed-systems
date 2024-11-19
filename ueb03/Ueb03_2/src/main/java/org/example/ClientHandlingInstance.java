@@ -51,7 +51,7 @@ public class ClientHandlingInstance implements Runnable {
                 System.out.println("received request: " + request);
                 int ind = request.getIndex();
                 System.out.println("index: " + ind);
-                if(ind >= 0 && ind < database.size() && database.get(ind) != null) {
+                if(ind >= 0 && database.get(ind) != null) {
                     responseBuilder.setRecord(database.get(ind));
                 } else {
                     responseBuilder.setRecord("This record does not exist");

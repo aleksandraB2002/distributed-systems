@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package io.grpc.database;
+
+// Optionen für Java-Codegenerierung
+option java_multiple_files = true;
+option java_package = "io.grpc.database";
+option java_outer_classname = "DatabaseProto";
+
+// Definition des gRPC-Dienstes
+service DatabaseService {
+  // Liest einen Datensatz aus der Datenbank
+  rpc GetRecord(GetRecordRequest) returns (GetRecordResponse);
+
+  // Fügt einen Datensatz zur Datenbank hinzu
+  rpc AddRecord(AddRecordRequest) returns (AddRecordResponse);
+
+  // Gibt die Anzahl der Datensätze in der Datenbank zurück
+  rpc GetSize(GetSizeRequest) returns (GetSizeResponse);
+}
+
+// Nachrichtenstruktur für die GetRecord-Anfrage
+message GetRecordRequest {
+  int32 index = 1;
+}
+
+// Antwort für GetRecord
+message GetRecordResponse {
+  string record = 1;
+  bool success = 2;
+}
+
+// Nachrichtenstruktur für die AddRecord-Anfrage
+message AddRecordRequest {
+  int32 index = 1;
+  string record = 2;
+}
+
+// Antwort für AddRecord
+message AddRecordResponse {
+  bool success = 1;
+}
+
+// Nachrichtenstruktur für die GetSize-Anfrage
+message GetSizeRequest {}
+
+// Antwort für GetSize
+message GetSizeResponse {
+  int32 size = 1;
+}

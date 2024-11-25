@@ -21,13 +21,10 @@ public class DatabaseServer {
     private static Map<Integer, String> database = new HashMap<>();
 
     public DatabaseServer() {
-        // Erstelle den Server und registriere den Service
         server = ServerBuilder.forPort(port)
                 .addService(new DatabaseServiceImpl())
                 .build();
     }
-
-    // Startet den Server
     public void start() throws IOException {
         server.start();
         System.out.println("Server started on port " + port);
@@ -37,7 +34,6 @@ public class DatabaseServer {
         }));
     }
 
-    // Stoppt den Server
     public void stop() {
         if (server != null) {
             server.shutdown();
@@ -50,7 +46,6 @@ public class DatabaseServer {
         server.server.awaitTermination();
     }
 
-    // Implementierung des Services
     static class DatabaseServiceImpl extends DatabaseServiceGrpc.DatabaseServiceImplBase {
 
         @Override

@@ -37,7 +37,6 @@ public class Client {
             System.out.println("1 = GET_RECORD, 2 = ADD_RECORD, 3 = GET_SIZE, 9 = END PROCESS");
 
             int selection = scanner.nextInt();
-            //scanner.nextLine();
             try {
                 switch (selection) {
                     case 1:

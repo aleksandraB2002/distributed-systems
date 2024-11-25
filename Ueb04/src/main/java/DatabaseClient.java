@@ -40,8 +40,8 @@ public class DatabaseClient {
 
     public static void main(String[] args) {
         DatabaseClient client = new DatabaseClient("localhost", 50051);
+        client.getSize();
 
-        // Test: Records hinzufügen
         client.addRecord(4101, "Appen");
         client.addRecord(4102, "Ahrensburg");
         client.addRecord(4103, "Wedel");
@@ -49,11 +49,9 @@ public class DatabaseClient {
         client.addRecord(4105, "Seevetal");
         client.addRecord(4106, "Quickborn");
 
-        // Test: Datensätze lesen
         client.getRecord(4103);
         client.getRecord(4107);
 
-        // Test: Datenbankgröße abfragen
         client.getSize();
     }
 }

@@ -21,7 +21,7 @@ enum Operation {
 }
 
 message RPC_Response {
-    string record = 1;           // Holds the record data for getRecord
-    int32 size = 2;              // Holds the size data for getSize
-    bool success = 3;            // Indicates success for addRecord operation
+    string record = 1;
+    int32 size = 2;
+    bool success = 3;
 }

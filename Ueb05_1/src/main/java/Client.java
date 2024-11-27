@@ -18,9 +18,20 @@ public class Client {
             int[] keys = {4101, 4102, 4103, 4104, 4105, 4106};
             String[] values = {"Appen", "Ahrensburg", "Wedel", "Aumuhle", "Seevetal", "Quickborn"};
 
+
+            Map<String, Object> sizeRequestTest = new HashMap<>();
+            sizeRequestTest.put("jsonrpc", "2.0");
+            sizeRequestTest.put("method", "getSize");
+            sizeRequestTest.put("id", 999);
+
+            out.println(mapper.writeValueAsString(sizeRequestTest));
+            System.out.println("Server response: " + in.readLine());
+
+            //hinzufügen der Daten in die Datenbank
             for (int i = 0; i < keys.length; i++) {
                 Map<String, Object> addRequest = new HashMap<>();
                 addRequest.put("jsonrpc", "2.0");
+
                 addRequest.put("method", "addRecord");
                 addRequest.put("params", Map.of("key", keys[i], "value", values[i]));
                 addRequest.put("id", i + 1);
@@ -29,6 +40,7 @@ public class Client {
                 System.out.println("Server response: " + in.readLine());
             }
 
+            //Request, für Wedel
             Map<String, Object> getRequest = new HashMap<>();
             getRequest.put("jsonrpc", "2.0");
             getRequest.put("method", "getRecord");
@@ -38,10 +50,12 @@ public class Client {
             out.println(mapper.writeValueAsString(getRequest));
             System.out.println("Server response: " + in.readLine());
 
+            //Request, an nicht existierenden Key
             getRequest.put("params", Map.of("key", 4107));
             out.println(mapper.writeValueAsString(getRequest));
             System.out.println("Server response: " + in.readLine());
 
+            //Get size
             Map<String, Object> sizeRequest = new HashMap<>();
             sizeRequest.put("jsonrpc", "2.0");
             sizeRequest.put("method", "getSize");

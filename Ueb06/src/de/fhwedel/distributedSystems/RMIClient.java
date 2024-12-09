@@ -7,6 +7,8 @@ public class RMIClient {
         try {
             DataBase db = readStubFromFile("database.stub");
 
+            System.out.println("Database Size: " + db.getSize());
+
             db.addRecord(4101, "Appen");
             db.addRecord(4102, "Ahrensburg");
             db.addRecord(4103, "Wedel");

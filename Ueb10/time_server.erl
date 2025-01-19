@@ -1,26 +1,62 @@
 -module(time_server).
--export([start/0, get_time/1, show_time/0]).
+-export([start/1, get/2, set/2, pause/1, resume/1, stop/1, init/1, loop/4, ticker/2]).
 
-% Starts the time server process
-start() ->
-    register(time_server, spawn(fun loop/0)).
+start(Speed) ->
+  spawn(?MODULE, init, [Speed]).
 
-% The main loop of the time server process
-loop() ->
-    receive
-        {get, Pid} ->
-            T2 = erlang:timestamp(),
-            Pid ! {cutc, T2, T2}, % Simplified global time calculation
-            loop();
-        show ->
-            io:format("Current time: ~p~n", [erlang:timestamp()]),
-            loop()
-    end.
+get(Pid, Caller) ->
+  Pid ! {get, Caller},
+  receive
+    {clock, Time} -> Time
+  after 2000 -> timeout
+  end.
 
-% Client API to get time from the server
-get_time(Pid) ->
-    time_server ! {get, Pid}.
+set(Pid, Value) ->
+  Pid ! {set, Value}.
 
-% Client API to display server's time
-show_time() ->
-    time_server ! show.
+pause(Pid) -> Pid ! pause.
+resume(Pid) -> Pid ! resume.
+stop(Pid) -> Pid ! stop.
+
+init(Speed) ->
+  TickerPid = spawn(?MODULE, ticker, [self(), Speed]),
+  loop(0, true, TickerPid, Speed).
+
+loop(Time, Running, TickerPid, Speed) ->  % Added Speed parameter
+  receive
+    {set, Value} -> loop(Value, Running, TickerPid, Speed);
+    {get, Pid} ->
+      {MegaSecs2, Secs2, MicroSecs2} = erlang:timestamp(),
+      T2 = timestamp_to_microseconds({MegaSecs2, Secs2, MicroSecs2}),
+      {MegaSecs, Secs, MicroSecs} = erlang:timestamp(),
+      Cutc = timestamp_to_microseconds({MegaSecs, Secs, MicroSecs}),
+      {MegaSecs3, Secs3, MicroSecs3} = erlang:timestamp(),
+      T3 = timestamp_to_microseconds({MegaSecs3, Secs3, MicroSecs3}),
+      Pid ! {Cutc, T2, T3},
+      io:format("UTC: ~p, T2: ~p, T3: ~p~n", [Cutc, T2, T3]),
+      loop(Time, Running, TickerPid, Speed);
+    pause -> loop(Time, false, TickerPid, Speed);
+    resume -> loop(Time, true, TickerPid, Speed);
+    stop -> exit(normal);
+    tick -> 
+      NewTime = if 
+        Running -> Time + Speed;  % Now using Speed to increment
+        true -> Time 
+      end,
+      loop(NewTime, Running, TickerPid, Speed);
+    show ->
+      io:format("Current Time: ~p, Running: ~p, Speed: ~p~n", [Time, Running, Speed]),
+      loop(Time, Running, TickerPid, Speed);
+    _Other ->
+      loop(Time, Running, TickerPid, Speed)
+  end.
+
+timestamp_to_microseconds({MegaSecs, Secs, MicroSecs}) ->
+    (MegaSecs * 1000000 + Secs) * 1000000 + MicroSecs.
+
+ticker(ClockPid, Speed) ->
+  receive
+  after Speed ->
+    ClockPid ! tick,
+    ticker(ClockPid, Speed)
+  end.

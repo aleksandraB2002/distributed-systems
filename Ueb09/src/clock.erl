@@ -43,14 +43,15 @@ loop(Time, Running, TickerPid) ->
   end.
 
 ticker(ClockPid, Speed) ->
-  timer:sleep(Speed),
-  ClockPid ! tick,
-  ticker(ClockPid, Speed).
-
+  receive
+  after Speed ->
+    ClockPid ! tick,
+    ticker(ClockPid, Speed)
+  end.
 
 % f(ClockPid).
 % ClockPid = clock:start(1000).
 % clock:get(ClockPid, self()).
 % clock:pause(ClockPid).
 % clock:resume(ClockPid).
-% clock:stop(ClockPid).
+% clock:resume(ClockPid).

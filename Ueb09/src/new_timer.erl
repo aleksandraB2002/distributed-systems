@@ -59,4 +59,4 @@ ticker(TimerPid) ->
 
 % TimerPid = new_timer:start(fun() -> io:format("Zeit abgelaufen!~n") end, 5).
 % new_timer:set(TimerPid, 10).
-%new_timer:stop(TimerPid).
+% new_timer:stop(TimerPid).
